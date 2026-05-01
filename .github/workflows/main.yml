@@ -2,15 +2,15 @@ name: Akro Quote Bot Runner
 
 on:
   push:
-    branches: [ "main", "master" ] # يدعم الفرعين الرئيسي والماستر
+    branches: [ "main", "master" ]
   schedule:
-    - cron: '0 */6 * * *' # تشغيل تلقائي كل 6 ساعات
-  workflow_dispatch: # زر التشغيل اليدوي
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
-    timeout-minutes: 350 # يغلق تلقائياً قبل حد الـ 6 ساعات بـ 10 دقائق لتجنب الفشل المفاجئ
+    timeout-minutes: 350
 
     services:
       redis:
@@ -26,14 +26,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Clone Quote API
+        run: |
+          git clone https://github.com/LyoSU/quote-api.git quote-api
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm' # تسريع التثبيت عبر الكاش
+          cache: 'npm'
           cache-dependency-path: |
+            package-lock.json
             quote-api/package-lock.json
-            quote-bot/package-lock.json
 
       - name: Install System Dependencies
         run: |
@@ -44,26 +48,15 @@ jobs:
         env:
           MONGO_URL: mongodb://localhost:27017/quote-db
         run: |
-          if [ -d "quote-api" ]; then
-            cd quote-api
-            npm install --production
-            node index.js &
-            sleep 10 # انتظار بدء السيرفر
-          else
-            echo "Error: Directory quote-api not found!"
-            exit 1
-          fi
+          cd quote-api
+          npm install --production
+          node index.js &
+          sleep 10
 
       - name: Install and Run Quote Bot
         env:
           REDIS_URL: redis://localhost:6379
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          if [ -d "quote-bot" ]; then
-            cd quote-bot
-            npm install --production
-            node updates-collector.js
-          else
-            echo "Error: Directory quote-bot not found!"
-            exit 1
-          fi
+          npm install --production
+          node updates-collector.js
