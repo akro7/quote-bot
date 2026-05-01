@@ -28,7 +28,7 @@ jobs:
 
       - name: Clone Quote API
         run: |
-          git clone https://github.com/akro7/quote-api.git quote-api
+          git clone https://github.com/LyoSU/quote-api.git quote-api
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
