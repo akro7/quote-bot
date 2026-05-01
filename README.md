@@ -224,4 +224,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Made with ❤️ by [LyoSU](https://github.com/akro7)
+Made with ❤️ by [AKRO](https://github.com/akro7)
