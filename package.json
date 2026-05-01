@@ -1,7 +1,7 @@
 {
-  "name": "quote-bot",
+  "name": "akro-quote-bot",
   "version": "1.0.7",
-  "description": "Telegram quote bot",
+  "description": "A powerful Telegram quote bot customized by Ahmed Younis",
   "main": "updates-collector.js",
   "scripts": {
     "test": "node --test 'utils/*.test.js'",
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LyoSU/quote-bot.git"
+    "url": "git+https://github.com/akro7/quote-bot.git"
   },
-  "author": "LyoSU",
+  "author": "Ahmed Younis",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/LyoSU/quote-bot/issues"
+    "url": "https://github.com/akro7/quote-bot/issues"
   },
-  "homepage": "https://github.com/LyoSU/quote-bot#readme",
+  "homepage": "https://github.com/akro7/quote-bot#readme",
   "engines": {
     "node": ">=22.0.0"
   },
