@@ -1,0 +1,56 @@
+name: Akro Quote Bot Runner
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 */6 * * *' # يشتغل تلقائياً كل 6 ساعات لضمان استمراره
+  workflow_dispatch: # يسمح لك بتشغيله يدوياً بالضغط على زر Run Workflow
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev
+
+      - name: Install and Run Quote API
+        env:
+          MONGO_URL: mongodb://localhost:27017/quote-db
+        run: |
+          cd quote-api
+          npm install --production
+          # تشغيل الـ API في الخلفية مع الانتظار ليتأكد من تشغيله
+          node index.js & 
+          sleep 5 
+
+      - name: Install and Run Quote Bot
+        env:
+          REDIS_URL: redis://localhost:6379
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          cd quote-bot
+          npm install --production
+          # تشغيل البوت
+          node updates-collector.js
