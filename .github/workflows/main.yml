@@ -2,14 +2,15 @@ name: Akro Quote Bot Runner
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "master" ] # يدعم الفرعين الرئيسي والماستر
   schedule:
-    - cron: '0 */6 * * *' # يشتغل تلقائياً كل 6 ساعات لضمان استمراره
-  workflow_dispatch: # يسمح لك بتشغيله يدوياً بالضغط على زر Run Workflow
+    - cron: '0 */6 * * *' # تشغيل تلقائي كل 6 ساعات
+  workflow_dispatch: # زر التشغيل اليدوي
 
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 350 # يغلق تلقائياً قبل حد الـ 6 ساعات بـ 10 دقائق لتجنب الفشل المفاجئ
 
     services:
       redis:
@@ -29,28 +30,40 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm' # تسريع التثبيت عبر الكاش
+          cache-dependency-path: |
+            quote-api/package-lock.json
+            quote-bot/package-lock.json
 
       - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libvips-dev
 
-      - name: Install and Run Quote API
+      - name: Install and Start Quote API
         env:
           MONGO_URL: mongodb://localhost:27017/quote-db
         run: |
-          cd quote-api
-          npm install --production
-          # تشغيل الـ API في الخلفية مع الانتظار ليتأكد من تشغيله
-          node index.js & 
-          sleep 5 
+          if [ -d "quote-api" ]; then
+            cd quote-api
+            npm install --production
+            node index.js &
+            sleep 10 # انتظار بدء السيرفر
+          else
+            echo "Error: Directory quote-api not found!"
+            exit 1
+          fi
 
       - name: Install and Run Quote Bot
         env:
           REDIS_URL: redis://localhost:6379
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          cd quote-bot
-          npm install --production
-          # تشغيل البوت
-          node updates-collector.js
+          if [ -d "quote-bot" ]; then
+            cd quote-bot
+            npm install --production
+            node updates-collector.js
+          else
+            echo "Error: Directory quote-bot not found!"
+            exit 1
+          fi
