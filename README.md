@@ -1,4 +1,4 @@
-#AKRO QuotLy Bot 💬✨
+# AKRO QuotLy Bot 💬✨
 
 A powerful Telegram bot that creates beautiful quote stickers from chat messages with AI-powered features.
 
